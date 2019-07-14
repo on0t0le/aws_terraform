@@ -5,6 +5,7 @@ variables.tf
 .terraform
 *.tfstate
 *.tfstate.backup
+*.lock.info
 ### Ignore keys
 keys/*
 
