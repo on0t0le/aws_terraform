@@ -8,10 +8,16 @@
     fstype: swap
     state: absent
 
-- name: Install docker
+- name: Install Docker
   package:
     name: docker
     state: present
+
+- name: start Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
 
 - name: ensure net.bridge.bridge-nf-call-ip6tables is set to 1
   sysctl:
