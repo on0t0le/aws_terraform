@@ -35,3 +35,7 @@ EoF
 kubectl apply -f test.yaml
 
 kubectl scale --replicas=10 deployment/nginx-to-scaleout
+
+
+Init Cluster with config-file:
+sudo kubeadm init --config=cluster-config.yaml --ignore-preflight-errors=NumCPU
