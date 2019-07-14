@@ -10,6 +10,17 @@ resource "aws_instance" "master-node" {
   key_name        = "k8s-master"
   security_groups = ["${aws_security_group.ssh.name}", "${aws_security_group.k8s-service-ports.name}"]
 
+  connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    host        = "${aws_instance.master-node.public_ip}"
+    private_key = "${file(var.private_key)}"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["ls ~/"]
+  }
+
   provisioner "file" {
     source      = "cluster_autoscaler/"
     destination = "/home/ec2-user"
