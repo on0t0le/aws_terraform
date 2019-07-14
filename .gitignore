@@ -1,2 +1,5 @@
 # Ignore variables
 variables.tf
+# Ignore terraform files
+.terraform
+terraform*
