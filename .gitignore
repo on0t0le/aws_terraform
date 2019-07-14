@@ -7,3 +7,6 @@ variables.tf
 *.tfstate.backup
 ### Ignore keys
 keys/*
+
+### Ansible hosts
+/ansible/hosts

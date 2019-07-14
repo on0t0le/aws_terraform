@@ -15,10 +15,10 @@ variable "myIP" {
 }
 
 variable "private_key" {
-  default = "path/to/private_key"
+  default = "./keys/private_key"
 }
 
 
 variable "public_key" {
-  default = "path/to/public_key.pub"
+  default = ./keys/public_key.pub"
 }
