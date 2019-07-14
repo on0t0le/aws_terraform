@@ -41,11 +41,10 @@
 
 - name: Install k8s packages
   package:
-    name: "{{ item }}"
+    name:
+        - kubelet
+        - kubeadm
     state: present
-  with_items:
-    - kubelet
-    - kubeadm
 
 - name: Start kubelet
   service:

@@ -11,3 +11,6 @@ keys/*
 
 ### Ansible hosts
 /ansible/hosts
+
+### Secret file
+cluster_autoscaler/secret.yaml
