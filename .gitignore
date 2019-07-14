@@ -1,5 +1,9 @@
-# Ignore variables
+### Ignore variables
 variables.tf
-# Ignore terraform files
+
+### Ignore terraform files
 .terraform
-terraform*
+*.tfstate
+*.tfstate.backup
+### Ignore keys
+keys/*
