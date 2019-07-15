@@ -3,12 +3,31 @@ resource "aws_key_pair" "k8s-master" {
   key_name   = "k8s-master"
   public_key = "${file("${var.public_key}")}"
 }
+
+data "template_file" "master-userdata" {
+  template = "${file("master.sh")}"
+
+  vars = {
+    k8stoken = "${var.k8stoken}"
+  }
+}
+
+data "template_file" "worker-userdata" {
+  template = "${file("worker.sh")}"
+
+  vars = {
+    k8stoken = "${var.k8stoken}"
+    masterIP = "${aws_instance.master-node.private_ip}"
+  }
+}
+
 ### Create Master node
 resource "aws_instance" "master-node" {
   ami             = "${data.aws_ami.amazon-linux-ami.id}"
   instance_type   = "t2.micro"
   key_name        = "k8s-master"
   security_groups = ["${aws_security_group.ssh.name}", "${aws_security_group.k8s-service-ports.name}"]
+  user_data       = "${data.template_file.master-userdata.rendered}"
 
   connection {
     type        = "ssh"
@@ -17,37 +36,27 @@ resource "aws_instance" "master-node" {
     private_key = "${file(var.private_key)}"
   }
 
-  provisioner "remote-exec" {
-    inline = ["ls ~/"]
-  }
-
   provisioner "file" {
     source      = "cluster_autoscaler/"
     destination = "/home/ec2-user"
   }
+  # provisioner "file" {
+  #   source      = "master.sh"
+  #   destination = "/home/ec2-user/master.sh"
+  # }
 
   tags = {
     Name = "master-node"
   }
 }
 
-# ### Create Worker node
-# resource "aws_instance" "worker-node" {
-#   ami             = "${data.aws_ami.amazon-linux-ami.id}"
-#   instance_type   = "t2.micro"
-#   key_name        = "k8s-master"
-#   security_groups = ["${aws_security_group.ssh.name}", "${aws_security_group.k8s-service-ports.name}"]
-
-#   tags = {
-#     Name = "worker-node"
-#   }
-# }
 
 resource "aws_launch_template" "worker-node" {
   name          = "worker-node-template"
   image_id      = "${data.aws_ami.amazon-linux-ami.id}"
   instance_type = "t2.micro"
   key_name      = "k8s-master"
+  user_data       = "${base64encode(data.template_file.worker-userdata.rendered)}"
 
   security_group_names = [
     "${aws_security_group.ssh.name}",
