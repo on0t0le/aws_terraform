@@ -21,5 +21,6 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cl
 EOF
 
 yum install -y kubelet kubeadm
+echo 'KUBELET_EXTRA_ARGS=--cloud-provider=aws' > /etc/sysconfig/kubelet
 
 for i in {1..50}; do kubeadm join --token=${k8stoken} --discovery-token-unsafe-skip-ca-verification ${masterIP}:6443 && break || sleep 15; done

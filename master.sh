@@ -29,19 +29,20 @@ bootstrapTokens:
 - groups:
   - system:bootstrappers:kubeadm:default-node-token
   token: "${k8stoken}"
+  #token: "783bde.3f89s0fje9f38fhf"
   ttl: "0"
-# nodeRegistration:
-#   kubeletExtraArgs:
-#     cloud-provider: aws
+nodeRegistration:
+  kubeletExtraArgs:
+    cloud-provider: aws
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
-# apiServer:
-#   extraArgs:
-#     cloud-provider: aws
-# controllerManager:
-#   extraArgs:
-#     cloud-provider: aws
+apiServer:
+  extraArgs:
+    cloud-provider: aws
+controllerManager:
+  extraArgs:
+    cloud-provider: aws
 networking:
   podSubnet: 10.244.0.0/16
 EOF
