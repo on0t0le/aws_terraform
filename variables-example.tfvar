@@ -22,3 +22,11 @@ variable "private_key" {
 variable "public_key" {
   default = ./keys/public_key.pub"
 }
+
+variable "k8stoken" {
+  default = "9a08jv.c0izixklcxtmnze7"
+}
+
+variable "cluster-name" {
+  default = "k8s-cluster"
+}

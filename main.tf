@@ -4,6 +4,7 @@ resource "aws_key_pair" "k8s-master" {
   public_key = "${file("${var.public_key}")}"
 }
 
+### Create master sh-script
 data "template_file" "master-userdata" {
   template = "${file("master.sh")}"
 
@@ -12,6 +13,7 @@ data "template_file" "master-userdata" {
   }
 }
 
+### Create worker sh-script
 data "template_file" "worker-userdata" {
   template = "${file("worker.sh")}"
 
@@ -21,6 +23,7 @@ data "template_file" "worker-userdata" {
   }
 }
 
+### Create IAM role
 resource "aws_iam_role" "role" {
   name = "${var.cluster-name}-instance-role"
   path = "/"
@@ -41,10 +44,11 @@ resource "aws_iam_role" "role" {
 EOF
 }
 
+### Create policy for IAM role
 resource "aws_iam_policy" "policy" {
-  name        = "${var.cluster-name}-autoscaling-policy"
-  path        = "/"
-  description = "Policy for ${var.cluster-name} cluster to allow cluster autoscaling to work"  
+  name = "${var.cluster-name}-autoscaling-policy"
+  path = "/"
+  description = "Policy for ${var.cluster-name} cluster to allow cluster autoscaling to work"
 
   policy = <<EOF
 {
@@ -70,12 +74,14 @@ resource "aws_iam_policy" "policy" {
 EOF
 }
 
+### Attach policy to role
 resource "aws_iam_policy_attachment" "test-attach" {
   name       = "test-attachment"
   roles      = ["${aws_iam_role.role.name}"]
   policy_arn = "${aws_iam_policy.policy.arn}"
 }
 
+### Create IAM profile
 resource "aws_iam_instance_profile" "profile" {
   name = "${var.cluster-name}-instance-profile"
   role = "${aws_iam_role.role.name}"
@@ -83,42 +89,38 @@ resource "aws_iam_instance_profile" "profile" {
 
 ### Create Master node
 resource "aws_instance" "master-node" {
-  ami = "${data.aws_ami.amazon-linux-ami.id}"
-  instance_type = "t2.micro"
-  key_name = "k8s-master"
-  security_groups = ["${aws_security_group.ssh.name}", "${aws_security_group.k8s-service-ports.name}"]
-  user_data = "${data.template_file.master-userdata.rendered}"
+  ami                  = "${data.aws_ami.amazon-linux-ami.id}"
+  instance_type        = "t2.micro"
+  key_name             = "k8s-master"
+  security_groups      = ["${aws_security_group.ssh.name}", "${aws_security_group.k8s-service-ports.name}"]
+  user_data            = "${data.template_file.master-userdata.rendered}"
   iam_instance_profile = "${aws_iam_instance_profile.profile.name}"
 
   connection {
-    type = "ssh"
-    user = "ec2-user"
-    host = "${aws_instance.master-node.public_ip}"
+    type        = "ssh"
+    user        = "ec2-user"
+    host        = "${aws_instance.master-node.public_ip}"
     private_key = "${file(var.private_key)}"
   }
 
   provisioner "file" {
-    source = "cluster_autoscaler/"
+    source      = "cluster_autoscaler/"
     destination = "/home/ec2-user"
   }
-  # provisioner "file" {
-  #   source = "master.sh"
-  #   destination = "/home/ec2-user/master.sh"
-  # }
-
+  
   tags = {
-    Name = "master-node"
-    "kubernetes.io/cluster/${var.cluster-name}" = "owned" 
+    Name                                        = "master-node"
+    "kubernetes.io/cluster/${var.cluster-name}" = "owned"
   }
 }
 
-
+### Create launch-template for worker node
 resource "aws_launch_template" "worker-node" {
   name          = "worker-node-template"
   image_id      = "${data.aws_ami.amazon-linux-ami.id}"
   instance_type = "t2.micro"
   key_name      = "k8s-master"
-  user_data       = "${base64encode(data.template_file.worker-userdata.rendered)}"
+  user_data     = "${base64encode(data.template_file.worker-userdata.rendered)}"
 
   iam_instance_profile {
     name = "${aws_iam_instance_profile.profile.name}"
@@ -130,6 +132,7 @@ resource "aws_launch_template" "worker-node" {
   ]
 }
 
+### Create ASG for working nodes
 resource "aws_autoscaling_group" "k8s-cluster-group" {
   name             = "k8s-group"
   desired_capacity = 1
@@ -159,7 +162,7 @@ resource "aws_autoscaling_group" "k8s-cluster-group" {
       propagate_at_launch = true
     },
     {
-      key = "kubernetes.io/cluster/${var.cluster-name}"
+      key                 = "kubernetes.io/cluster/${var.cluster-name}"
       value               = "owned"
       propagate_at_launch = true
     }
