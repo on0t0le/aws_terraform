@@ -7,7 +7,7 @@ EOF
 sysctl -p
 
 ### Install Docker
-yum install -y docker
+yum install -y docker jq
 systemctl start docker.service
 systemctl enable docker.service
 
@@ -24,6 +24,9 @@ EOF
 
 ### Insatll kubernetes utilities
 yum install -y kubelet kubeadm kubectl
+
+publicip=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
+publicdns=$(curl http://169.254.169.254/latest/meta-data/public-hostname)
 
 ### Create cluster-init config-file
 cat >init-config.yaml <<EOF
@@ -43,6 +46,9 @@ kind: ClusterConfiguration
 apiServer:
   extraArgs:
     cloud-provider: aws
+  certSANs:
+  - "$publicip"
+  - "$publicdns"
 controllerManager:
   extraArgs:
     cloud-provider: aws

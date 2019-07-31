@@ -14,3 +14,5 @@ keys/*
 
 ### Secret file
 cluster_autoscaler/secret.yaml
+hpa/k8s-prom-hpa/custom-metrics-api/cm-adapter*
+hpa/k8s-prom-hpa/output

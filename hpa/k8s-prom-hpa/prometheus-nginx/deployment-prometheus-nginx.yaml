@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-prometheus
+  labels:
+    app: nginx-prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-prometheus
+  template:
+    metadata:
+      labels:
+        app: nginx-prometheus
+      annotations:
+        # these annotations tell prometheus it should scrape metrics from the node exporter
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9527"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: nginx-prometheus
+        image: abuhrovyi/prometheus-nginx
+        ports:
+        - containerPort: 80
+        - containerPort: 9527
