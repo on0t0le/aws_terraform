@@ -25,3 +25,23 @@ spec:
         ports:
         - containerPort: 80
         - containerPort: 9527
+        volumeMounts:
+        - mountPath: /etc/nginx/conf.d # mount nginx-conf volumn to /etc/nginx
+          readOnly: true
+          name: nginx-conf
+        - mountPath: /usr/share/nginx/html
+          name: webpage
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: nginx-conf # place ConfigMap `nginx-conf` on /etc/nginx
+          items:
+            - key: default.conf
+              path: default.conf
+      - name: webpage
+        configMap:
+          name: web-page
+          items:
+            - key: index.html
+              path: index.html
+        

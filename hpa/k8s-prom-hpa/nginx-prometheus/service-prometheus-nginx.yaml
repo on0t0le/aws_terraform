@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx-prometheus
+  name: nginx-service
+spec:
+  ports:
+  - name: http
+    nodePort: 32700
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: metrics
+    nodePort: 32701
+    port: 9527
+    protocol: TCP
+    targetPort: 9527
+  selector:
+    app: nginx-prometheus
+  type: NodePort

@@ -107,6 +107,10 @@ resource "aws_instance" "master-node" {
     source      = "cluster_autoscaler/"
     destination = "/home/ec2-user"
   }
+  provisioner "file" {
+    source      = "hpa/k8s-prom-hpa/"
+    destination = "/home/ec2-user"
+  }
   
   tags = {
     Name                                        = "master-node"
